@@ -552,7 +552,9 @@ class Model_Table extends CI_Model{
                     p.Article_No,
                     p.Product_ReOrederLevel,
                     p.Product_Purchase_Rate,
+                    p.Product_SellingPrice,
                     (select (p.Product_Purchase_Rate * current_quantity)) as stock_value,
+                    (select (p.Product_SellingPrice * current_quantity)) as sales_stock_value,
                     pc.ProductCategory_Name,
                     b.brand_name,
                     u.Unit_Name
@@ -680,10 +682,12 @@ class Model_Table extends CI_Model{
         return $dueResult;
     }
 
-    public function productStock($productId) {
+    public function productStock($productId) 
+    {
         $stockQuery = $this->db->query("select * from tbl_currentinventory where product_id = ?  and branch_id = ?", [$productId, $this->session->userdata("BRANCHid")]);
         $stockCount = $stockQuery->num_rows();
         $stock = 0;
+        
         if($stockCount != 0){
             $stockRow = $stockQuery->row();
             $stock = ($stockRow->purchase_quantity + $stockRow->transfer_to_quantity + $stockRow->sales_return_quantity) 

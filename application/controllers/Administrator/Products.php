@@ -219,6 +219,7 @@ class Products extends CI_Controller {
     }
 
     public function getCurrentStock(){
+        
         $data = json_decode($this->input->raw_input_stream);
 
         $clauses = "";
@@ -232,6 +233,11 @@ class Products extends CI_Controller {
             array_map(function($product){
                 return $product->stock_value;
             }, $stock));
+
+            $res['totalSalesValue'] = array_sum(
+                array_map(function($product){
+                    return $product->sales_stock_value;
+                }, $stock));
 
         echo json_encode($res);
     }
@@ -324,6 +330,7 @@ class Products extends CI_Controller {
                     from tbl_transferdetails trd
                     join tbl_transfermaster tm on tm.transfer_id = trd.transfer_id
                     where trd.product_id = p.Product_SlNo
+                    and tm.status = 'a'
                     and tm.transfer_to = '$branchId'
                     " . (isset($data->date) && $data->date != null ? " and tm.transfer_date <= '$data->date'" : "") . "
                 ) as transferred_to_quantity,

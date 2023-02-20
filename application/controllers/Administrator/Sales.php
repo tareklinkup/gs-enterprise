@@ -806,10 +806,8 @@ class Sales extends CI_Controller {
                     update tbl_currentinventory set 
                     sales_return_quantity = sales_return_quantity - ? 
                     where product_id = ? 
-                    and size_id = ? 
-                    and color_id = ? 
                     and branch_id = ?
-                ", [$product->SaleReturnDetails_ReturnQuantity, $product->SaleReturnDetailsProduct_SlNo, $product->size_id, $product->color_id, $this->sbrunch]);
+                ", [$product->SaleReturnDetails_ReturnQuantity, $product->SaleReturnDetailsProduct_SlNo, $this->sbrunch]);
             }
     
             $this->db->query("delete from tbl_salereturndetails where SaleReturn_IdNo = ?", $data->id);
@@ -1825,13 +1823,13 @@ class Sales extends CI_Controller {
 
             foreach ($saleDetails as $detail){
                 /*Get Product Current Quantity*/
-                $totalQty = $this->db->where(['product_id' => $detail->Product_IDNo, 'size_id' => $detail->size_id, 'color_id' => $detail->color_id,  'branch_id'=>$sale->SaleMaster_branchid])->get('tbl_currentinventory')->row()->sales_quantity;
+                $totalQty = $this->db->where(['product_id' => $detail->Product_IDNo, 'branch_id'=>$sale->SaleMaster_branchid])->get('tbl_currentinventory')->row()->sales_quantity;
 
                 /* Subtract Product Quantity form  Current Quantity  */
                 $newQty = $totalQty - $detail->SaleDetails_TotalQuantity;
 
                     /*Update Sales Inventory*/
-                $this->db->set('sales_quantity', $newQty)->where(['product_id' => $detail->Product_IDNo, 'size_id' => $detail->size_id, 'color_id' => $detail->color_id, 'branch_id'=>$sale->SaleMaster_branchid])->update('tbl_currentinventory');
+                $this->db->set('sales_quantity', $newQty)->where(['product_id' => $detail->Product_IDNo, 'branch_id'=>$sale->SaleMaster_branchid])->update('tbl_currentinventory');
 
             }
 

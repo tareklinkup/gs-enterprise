@@ -333,7 +333,7 @@ new Vue({
             if (this.selectedProduct == null) {
                 return;
             }
-            this.total = this.quantity * this.selectedProduct.Product_Purchase_Rate;
+            this.total = this.quantity * this.selectedProduct.Product_SellingPrice;
         },
 
         addToCart() {
@@ -357,7 +357,7 @@ new Vue({
                 name: this.selectedProduct.Product_Name,
                 product_code: this.selectedProduct.Product_Code,
                 quantity: this.quantity,
-                purchase_rate: this.selectedProduct.Product_Purchase_Rate,
+                sales_rate: this.selectedProduct.Product_SellingPrice,
                 total: this.total
             }
 

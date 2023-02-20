@@ -104,16 +104,20 @@
     <div class="row">
         <div class="col-md-12">
             <div class="table-responsive" id="stockContent">
-                <table class="table table-bordered" v-if="searchType == 'current'" style="display:none"
-                    v-bind:style="{display: searchType == 'current' ? '' : 'none'}">
+
+                <table class="table table-bordered" v-if="searchType == 'current' && brunch_id == 1"
+                    style="display:none"
+                    v-bind:style="{display: searchType == 'current' && brunch_id == 1 ? '' : 'none'}">
                     <thead>
                         <tr>
                             <th>Product Id</th>
                             <th>Product Name</th>
                             <th>Category</th>
                             <th>Current Quantity</th>
-                            <th>Rate</th>
-                            <th>Stock Value</th>
+                            <th>Purchase Rate</th>
+                            <th>Sales Rate</th>
+                            <th>Purchase Stock Value</th>
+                            <th>Sales Stock Value</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -123,15 +127,53 @@
                             <td>{{ product.ProductCategory_Name }}</td>
                             <td>{{ product.current_quantity }} {{ product.Unit_Name }}</td>
                             <td>{{ product.Product_Purchase_Rate | decimal }}</td>
+                            <td>{{ product.Product_SellingPrice | decimal }}</td>
                             <td>{{ product.stock_value | decimal }}</td>
+                            <td>{{ product.sales_stock_value | decimal }}</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr style="font-weight:bold;">
+                            <td colspan="3" style="text-align:right;">Total </td>
+                            <td>
+                                {{stock.reduce((acc, pre) => {return acc + +pre.current_quantity},0)}}</td>
+                            <td></td>
+                            <td></td>
+                            <td>{{ totalStockValue | decimal }}</td>
+                            <td>{{ totalStockSaleValue | decimal }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <table class="table table-bordered" v-if="searchType == 'current'" style="display:none"
+                    v-bind:style="{display: searchType == 'current' && brunch_id != 1 ? '' : 'none'}">
+                    <thead>
+                        <tr>
+                            <th>Product Id</th>
+                            <th>Product Name</th>
+                            <th>Category</th>
+                            <th>Current Quantity</th>
+                            <th>Sales Rate</th>
+                            <th>Sales Stock Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="product in stock">
+                            <td>{{ product.Product_Code }}</td>
+                            <td style="width:13%">{{ product.Product_Name }} - {{ product.Article_No }}</td>
+                            <td>{{ product.ProductCategory_Name }}</td>
+                            <td>{{ product.current_quantity }} {{ product.Unit_Name }}</td>
+                            <td>{{ product.Product_SellingPrice | decimal }}</td>
+                            <td>{{ product.sales_stock_value | decimal }}</td>
                         </tr>
                     </tbody>
                     <tfoot>
                         <tr>
                             <th colspan="3" style="text-align:right;">Total Stock Quantity</th>
-                            <th style="text-align:center;">{{stock.reduce((acc, pre) => {return acc + +pre.current_quantity},0)}}</th>
-                            <th style="text-align:right;">Total Stock Value</th>
-                            <th style="text-align:center;">{{ totalStockValue | decimal }}</th>
+                            <th style="text-align:center;">
+                                {{stock.reduce((acc, pre) => {return acc + +pre.current_quantity},0)}}</th>
+                            <th style="text-align:right;">Total Sales Stock Value</th>
+                            <th style="text-align:center;">{{ totalStockSaleValue | decimal }}</th>
                         </tr>
                     </tfoot>
                 </table>
@@ -176,7 +218,8 @@
                     <tfoot>
                         <tr>
                             <th colspan="10" style="text-align:right;">Total Stock Quantity</th>
-                            <th style="text-align:center;">{{stock.reduce((acc, pre) => {return acc + +pre.current_quantity},0)}}</th>
+                            <th style="text-align:center;">
+                                {{stock.reduce((acc, pre) => {return acc + +pre.current_quantity},0)}}</th>
                             <th style="text-align:center;">Total Stock Value</th>
                             <th>{{ totalStockValue | decimal }}</th>
                         </tr>
@@ -243,6 +286,7 @@ new Vue({
 
             stock: [],
             totalStockValue: 0.00,
+            totalStockSaleValue: 0.00,
             branchId: '',
             branches: [],
             brunch_id: "<?php echo $this->session->userdata('BRANCHid'); ?>",
@@ -356,6 +400,7 @@ new Vue({
                     this.stock = res.data.stock;
                 }
                 this.totalStockValue = res.data.totalValue;
+                this.totalStockSaleValue = res.data.totalSalesValue;
             })
         },
         onChangeSearchType() {

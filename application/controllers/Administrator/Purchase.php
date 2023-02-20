@@ -1199,7 +1199,7 @@ class Purchase extends CI_Controller
             $purchaseDetails = $this->db->select('Product_IDNo, size_id, color_id, PurchaseDetails_TotalQuantity,PurchaseDetails_TotalAmount')->where('PurchaseMaster_IDNo',$data->purchaseId)->get('tbl_purchasedetails')->result();
 
             foreach($purchaseDetails as $detail) {
-                $stock = $this->mt->productStock($detail->Product_IDNo, $detail->size_id, $detail->color_id);
+                $stock = $this->mt->productStock($detail->Product_IDNo);
                 if($detail->PurchaseDetails_TotalQuantity > $stock) {
                     $res = ['success'=>false, 'message'=>'Product out of stock, Purchase can not be deleted'];   
                     echo json_encode($res);
@@ -1208,16 +1208,14 @@ class Purchase extends CI_Controller
             }
 
             foreach($purchaseDetails as $product){
-                $previousStock = $this->mt->productStock($product->Product_IDNo, $detail->size_id, $detail->color_id);
+                $previousStock = $this->mt->productStock($product->Product_IDNo);
 
                 $this->db->query("
                     update tbl_currentinventory 
                     set purchase_quantity = purchase_quantity - ? 
                     where product_id = ?
-                    and size_id = ?
-                    and color_id = ?
                     and branch_id = ?
-                ", [$product->PurchaseDetails_TotalQuantity, $product->Product_IDNo, $product->size_id, $product->color_id,  $this->session->userdata('BRANCHid')]);
+                ", [$product->PurchaseDetails_TotalQuantity, $product->Product_IDNo, $this->session->userdata('BRANCHid')]);
 
                 $this->db->query("
                     update tbl_product set 
@@ -1805,10 +1803,8 @@ class Purchase extends CI_Controller
                     update tbl_currentinventory set 
                     purchase_return_quantity = purchase_return_quantity - ? 
                     where product_id = ? 
-                    and size_id = ? 
-                    and color_id = ? 
                     and branch_id = ?
-                ", [$product->PurchaseReturnDetails_ReturnQuantity, $product->PurchaseReturnDetailsProduct_SlNo, $product->size_id, $product->color_id, $this->brunch]);
+                ", [$product->PurchaseReturnDetails_ReturnQuantity, $product->PurchaseReturnDetailsProduct_SlNo, $this->brunch]);
             }
     
             $this->db->query("delete from tbl_purchasereturndetails where PurchaseReturn_SlNo = ?", $data->id);

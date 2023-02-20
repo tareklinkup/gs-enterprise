@@ -59,7 +59,7 @@
                         // 'size_id' => $cartProduct->size_id,
                         // 'color_id' => $cartProduct->color_id,
                         'quantity' => $cartProduct->quantity,
-                        'purchase_rate' => $cartProduct->purchase_rate,
+                        'sales_rate' => $cartProduct->sales_rate,
                         'total' => $cartProduct->total
                     );
 
@@ -343,12 +343,10 @@
                     // ", [$product->quantity, $product->product_id, $product->size_id, $product->color_id, $this->session->userdata('BRANCHid')]);
                     
 
-                     $transferToBranchInventoryCount = $this->db->query("select * from tbl_currentinventory where product_id = ? and size_id = ? and color_id = ? and branch_id = ?", [$product->product_id, $product->size_id, $product->color_id, $data->transfer->transfer_to])->num_rows();
+                     $transferToBranchInventoryCount = $this->db->query("select * from tbl_currentinventory where product_id = ? and branch_id = ?", [$product->product_id, $data->transfer->transfer_to])->num_rows();
                     if($transferToBranchInventoryCount == 0){
                         $transferToBranchInventory = array(
                             'product_id' => $product->product_id,
-                            'size_id' => $product->size_id,
-                            'color_id' => $product->color_id,
                             'transfer_to_quantity' => $product->quantity,
                             'branch_id' => $data->transfer->transfer_to
                         );
@@ -359,10 +357,8 @@
                             update tbl_currentinventory
                             set transfer_to_quantity = transfer_to_quantity + ?
                             where product_id = ?
-                            and size_id = ?
-                            and color_id = ?
                             and branch_id = ?
-                        ", [$product->quantity, $product->product_id, $product->size_id, $product->color_id, $data->transfer->transfer_to]);
+                        ", [$product->quantity, $product->product_id, $data->transfer->transfer_to]);
                     }
                 }
                 $res = ['success'=>true, 'message'=>'Transfer Approved'];

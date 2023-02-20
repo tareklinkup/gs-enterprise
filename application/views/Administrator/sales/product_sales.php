@@ -262,8 +262,9 @@
                             <input type="password" ref="productPurchaseRate"
                                 v-model="selectedProduct.Product_Purchase_Rate"
                                 v-on:mousedown="toggleProductPurchaseRate" v-on:mouseup="toggleProductPurchaseRate"
-                                readonly title="Purchase rate (click & hold)"
-                                style="font-size:12px;width:100%;text-align: center;">
+                                :style="{display: selectedBranch.brunch_id != 1 ? 'none' : ''}" readonly
+                                title="Purchase rate (click & hold)"
+                                style="font-size:12px;width:100%;text-align: center; display:none">
 
                         </div>
                     </div>
