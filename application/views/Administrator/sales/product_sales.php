@@ -751,9 +751,7 @@ new Vue({
             if ((this.selectedProduct.Product_SlNo != '' || this.selectedProduct.Product_SlNo != 0) && this
                 .sales.isService == 'false') {
                 this.productStock = await axios.post('/get_product_stock', {
-                    productId: this.selectedProduct.Product_SlNo,
-                    size_id: this.selectedSize.Size_SlNo,
-                    color_id: this.selectedColor.color_SiNo
+                    productId: this.selectedProduct.Product_SlNo
                 }).then(res => {
                     return res.data;
                 })
