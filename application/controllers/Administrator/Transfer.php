@@ -46,7 +46,9 @@
                     'transfer_to' => $data->transfer->transfer_to,
                     'note' => $data->transfer->note,
                     'total_amount' => $data->transfer->total_amount,
-                    'status' => 'p'
+                    'status' => 'p',
+                    'added_datetime' => date("Y-m-d H:i:s"),
+                    'added_by' => $this->session->userdata("userId")
                 );
 
                 $this->db->insert('tbl_transfermaster', $transfer);
@@ -128,7 +130,9 @@
                     'transfer_by' => $data->transfer->transfer_by,
                     'transfer_from' => $this->session->userdata('BRANCHid'),
                     'transfer_to' => $data->transfer->transfer_to,
-                    'note' => $data->transfer->note
+                    'note' => $data->transfer->note,
+                    'updated_datetime' => date("Y-m-d H:i:s"),
+                    'updated_by' => $this->session->userdata("userId")
                 );
 
                 $this->db->where('transfer_id', $transferId)->update('tbl_transfermaster', $transfer);
@@ -260,7 +264,8 @@
                 from tbl_transfermaster tm
                 join tbl_brunch b on b.brunch_id = tm.transfer_to
                 join tbl_employee e on e.Employee_SlNo = tm.transfer_by
-                where tm.transfer_from = ? $clauses
+                where tm.transfer_from = ? 
+                and tm.status != 'd' $clauses
             ", $this->session->userdata('BRANCHid'))->result();
 
             echo json_encode($transfers);
@@ -282,6 +287,7 @@
                 left join tbl_size s on s.Size_SlNo = td.size_id
                 left join tbl_color c on c.color_SiNo = td.color_id
                 where td.transfer_id = ?
+                and td.status != 'd'
             ", $data->transferId)->result();
 
             echo json_encode($transferDetails);
@@ -324,8 +330,9 @@
 
             /*approve Sale Master Data*/
             try{
-                $this->db->set('Status', 'a')->where('transfer_id', $data->transfer->transfer_id)->update('tbl_transfermaster');
-
+                $this->db->set('status', 'a')->where('transfer_id', $data->transfer->transfer_id)->update('tbl_transfermaster');
+                //$this->db->set('status', 'a')->where('transfer_id', $data->transfer->transfer_id)->update('tbl_transferdetails');
+                
                 /*approve Sale Details*/
                 //$this->db->set('Status', 'a')->where('SaleMaster_IDNo', $data->saleId)->update('tbl_saledetails');
     
@@ -410,26 +417,28 @@
                 $oldTransfer = $this->db->query("select * from tbl_transfermaster where transfer_id = ?", $transferId)->row();
                 $oldTransferDetails = $this->db->query("select * from tbl_transferdetails where transfer_id = ?", $transferId)->result();
 
-                $this->db->query("delete from tbl_transfermaster where transfer_id = ?", $transferId);
-                $this->db->query("delete from tbl_transferdetails where transfer_id = ?", $transferId);
+                // $oldTransfer = $this->db->query("update tbl_transfermaster set status = 'd' where transfer_id = ?", $transferId);
+                // $oldTransferDetails = $this->db->query("update tbl_transferdetails set status = 'd' where transfer_id = ?", $transferId);
+
+
+                $this->db->query("update tbl_transfermaster set status = 'd' where transfer_id = ?", $transferId);
+                //$this->db->query("update tbl_transferdetails set status = 'd' where transfer_id = ?", $transferId);
+
+                //$this->db->query("delete from tbl_transferdetails where transfer_id = ?", $transferId);
                 foreach($oldTransferDetails as $oldDetails) {
                     $this->db->query("
                         update tbl_currentinventory 
                         set transfer_from_quantity = transfer_from_quantity - ? 
                         where product_id = ?
-                        and size_id = ?
-                        and color_id = ?
                         and branch_id = ?
-                    ", [$oldDetails->quantity, $oldDetails->product_id, $oldDetails->size_id, $oldDetails->color_id, $this->session->userdata('BRANCHid')]);
+                    ", [$oldDetails->quantity, $oldDetails->product_id, $this->session->userdata('BRANCHid')]);
 
                     $this->db->query("
                         update tbl_currentinventory 
                         set transfer_to_quantity = transfer_to_quantity - ? 
                         where product_id = ?
-                        and size_id = ?
-                        and color_id = ?
                         and branch_id = ?
-                    ", [$oldDetails->quantity, $oldDetails->product_id, $oldDetails->size_id,  $oldDetails->color_id, $oldTransfer->transfer_to]);
+                    ", [$oldDetails->quantity, $oldDetails->product_id, $oldTransfer->transfer_to]);
                 }
 
                 $res = ['success'=>true, 'message'=>'Transfer deleted'];
