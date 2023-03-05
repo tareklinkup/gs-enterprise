@@ -348,6 +348,11 @@ new Vue({
                 return;
             }
 
+            if (product.quantity == 0 || product.quantity == '') {
+                alert('Enter quantity');
+                return;
+            }
+
             let cartProduct = {
                 product_id: this.selectedProduct.Product_SlNo,
                 // size_id: this.selectedSize.Size_SlNo,
@@ -359,6 +364,11 @@ new Vue({
                 quantity: this.quantity,
                 sales_rate: this.selectedProduct.Product_SellingPrice,
                 total: this.total
+            }
+
+            let cartInd = this.cart.findIndex(p => p.product_id == cartProduct.product_id);
+            if (cartInd > -1) {
+                this.cart.splice(cartInd, 1);
             }
 
             this.cart.push(cartProduct);
