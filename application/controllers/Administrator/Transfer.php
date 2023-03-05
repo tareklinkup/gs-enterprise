@@ -161,7 +161,8 @@
                     $this->db->insert('tbl_transferdetails', $transferDetails);
 
                     $currentBranchInventoryCount = $this->db->query("select * from tbl_currentinventory where product_id = ? and branch_id = ?", [$cartProduct->product_id, $this->session->userdata('BRANCHid')])->num_rows();
-                    if($currentBranchInventoryCount == 0){
+                    if($currentBranchInventoryCount == 0)
+                    {
                         $currentBranchInventory = array(
                             'product_id' => $cartProduct->product_id,
                             'transfer_from_quantity' => $cartProduct->quantity,
